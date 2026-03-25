@@ -1,57 +1,75 @@
-# SETUP.md
+# Setup
 
-These steps assume this directory is the project root.
+These steps assume this repository is the project root.
 
-## One-time setup
-1. Create a new repo for this site.
-2. Copy this project into that repo or make this directory the repo root.
-3. Copy `.env.example` to `.env`.
-4. Set:
+## Local Setup
+
+1. Copy `.env.example` to `.env`.
+2. Set:
    - `EDIT_TOKEN`
    - `COOKIE_SECRET`
-   - S3/CDN vars if you want hosted editing with durable uploads
-5. Install Python dependencies.
-6. Install frontend dependencies.
-7. Build the frontend bundle.
-8. Run the app locally.
-9. Confirm the sample homepage, project pages, and `/me` page load.
-10. Log in at `/edit/login`.
-11. Replace the sample content and images.
+   - S3/CDN variables only if you want hosted editing and uploads to persist across deploys
+3. Install dependencies:
 
-## Production setup
-12. Create an S3 bucket and CDN if you want hosted editing to persist uploads/content.
-13. Add the same env vars in your host.
-14. Deploy.
-15. Test:
-    - homepage
-    - a project page
-    - `/me`
-    - `/edit/login`
-    - image upload
-    - save project
-    - save about
+```bash
+uv sync --group dev
+npm ci
+```
 
-## Normal content workflow
-16. Log in at `/edit/login`.
-17. Edit the about page or a project.
-18. Upload images from the editor.
-19. Save.
-20. Refresh the public page and confirm the change.
+4. Build the frontend bundle:
 
-## Working with a coding agent
-21. Open a new chat in the repo.
-22. Tell the agent to work only inside the project root.
-23. Point it to:
-    - `README.md`
-    - `README_AGENT.md`
-    - `SETUP.md`
-24. Describe the change in plain language.
-25. Ask it to implement, test, and summarize the result.
+```bash
+npm run build
+```
 
-## Good requests to give the agent
-- “Replace the sample projects with my real work.”
-- “Adjust the homepage card layout.”
-- “Add a new social link.”
-- “Change the typography and colors.”
-- “Add a contact section to `/me`.”
-- “Improve the mobile spacing.”
+5. Run the app locally:
+
+```bash
+uv run uvicorn main:app --reload --port 8001
+```
+
+6. Confirm:
+   - `/`
+   - a sample project page
+   - `/me`
+   - `/edit/login`
+
+## Before Public Handoff
+
+1. Replace the sample content in `content/`.
+2. Replace any sample seed images you do not want to ship from `static/seed/`.
+3. Run verification:
+
+```bash
+uv run pytest
+npm test
+npm run typecheck
+npm run build
+```
+
+4. Add the same environment variables in your host.
+5. If remote edits or uploads must survive deploys, configure S3/CDN.
+6. Deploy and smoke-test:
+   - homepage
+   - a project page
+   - `/me`
+   - `/edit/login`
+   - image upload
+   - save project
+   - save about
+
+## Normal Content Workflow
+
+1. Log in at `/edit/login`.
+2. Edit the about page or a project.
+3. Upload images from the editor as needed.
+4. Save.
+5. Refresh the public page and confirm the change.
+
+## Working With A Coding Agent
+
+1. Open a new chat in the repo.
+2. Tell the agent to work only inside the project root.
+3. Point it to `README.md`, `README_AGENT.md`, and `SETUP.md`.
+4. Describe the change in plain language.
+5. Ask it to implement, verify, and summarize the result.

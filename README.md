@@ -1,19 +1,60 @@
-# Portfolio CMS
+# portfolio-kit
 
-This project is a FastAPI-based personal portfolio site with a small markdown CMS, a live editing interface, image uploads, and server-rendered public pages.
+`portfolio-kit` is a small FastAPI portfolio starter with server-rendered public pages, markdown content, and a built-in editor for projects, the about page, settings, and image uploads.
 
-The documentation in this directory assumes this directory is the project root. If you split it into its own repository, keep the same structure and commands.
+## What It Includes
 
-## What It Does
+- homepage, about page, and project detail pages
+- markdown project files with YAML frontmatter
+- markdown about page and JSON site settings
+- edit login/logout plus authenticated content APIs
+- local file storage for development
+- optional S3-backed content and image persistence
+- backend tests, frontend tests, typecheck, and production build commands
 
-- renders a homepage, about page, and individual project pages
-- stores projects as markdown files with YAML frontmatter
-- stores the about page as markdown
-- stores site-wide settings as JSON
-- supports edit login/logout for remote editing
-- supports project create, edit, delete, and image upload
-- supports local file storage in development
-- supports optional S3-backed content and image persistence
+## Requirements
+
+- Python 3.12+
+- Node.js 20+
+- `uv`
+
+## Quick Start
+
+1. Copy `.env.example` to `.env`.
+2. Set `EDIT_TOKEN` and `COOKIE_SECRET`.
+3. Install dependencies:
+
+```bash
+uv sync --group dev
+npm ci
+```
+
+4. Build the frontend bundle:
+
+```bash
+npm run build
+```
+
+5. Run the app:
+
+```bash
+uv run uvicorn main:app --reload --port 8001
+```
+
+6. Open `/`, `/me`, and `/edit/login`.
+
+If you want remote edits and uploaded images to survive deploys, also set the S3/CDN variables from `.env.example`.
+
+## Verification
+
+```bash
+uv run pytest
+npm test
+npm run typecheck
+npm run build
+```
+
+The same verification now runs in GitHub Actions on pushes and pull requests.
 
 ## Routes
 
@@ -22,26 +63,7 @@ The documentation in this directory assumes this directory is the project root. 
 - `/{slug}` project page
 - `/edit/login`
 - `/edit/logout`
-- `/api/*` edit and content-management endpoints
-
-## Quick start
-
-1. Copy `.env.example` to `.env`.
-2. Set `EDIT_TOKEN` and `COOKIE_SECRET`.
-3. Install Python dependencies.
-4. Install frontend dependencies.
-5. Build the frontend bundle.
-6. Run the app from this directory.
-
-## Commands
-
-```bash
-uv run pytest
-npm test
-npm run typecheck
-npm run build
-uv run uvicorn main:app --reload --port 8001
-```
+- `/api/*` editor and content-management endpoints
 
 ## Content
 
@@ -65,42 +87,32 @@ og_image: /static/seed/project-one/og.svg
 - `content/about.md` stores the about page markdown.
 - `content/settings.json` stores site name, owner name, tagline, about photo, contact email, and social links.
 - `content/assets.json` stores upload deduplication metadata.
+- `static/seed/` ships sample artwork that you can replace during handoff.
 
 ## Editor
 
-The editor uses three block types:
+The editor supports three block types:
 
 - `text`
 - `image`
 - `divider`
 
-Text blocks support markdown authoring with live rendered preview. Image blocks support upload, alt text, caption, alignment, and width. Divider blocks serialize to `---`.
+Text blocks support markdown authoring with live preview. Image blocks support upload, alt text, caption, alignment, and width. Divider blocks serialize to `---`.
 
-## Storage behavior
+## Storage Behavior
 
 - Content files are always written locally under `content/`.
 - If S3 is configured, content files are also synced to `content/` keys in S3.
 - Uploaded images go to S3 when configured.
 - Without S3, uploads are written under `static/uploads/images/`.
 
-## Project layout
+## Project Layout
 
 - `main.py`: FastAPI app entrypoint
 - `routers/`: page, auth, and admin routes
-- `utils/`: content loading, storage, assets, image processing, S3 sync
+- `utils/`: content loading, storage, assets, image processing, and S3 sync
 - `templates/`: Jinja templates for public pages and errors
-- `static/`: CSS, frontend TypeScript, built bundles, seed assets, uploads
+- `static/`: CSS, TypeScript sources, built bundles, seed assets, and uploads
 - `content/`: markdown content and JSON settings
-- `tests/`: backend and frontend safety checks
+- `tests/`: backend and frontend verification
 - `tools/`: small helper scripts
-
-## Environment
-
-The required environment variables are documented in `.env.example`.
-
-In practice, most local setups only need:
-
-- `EDIT_TOKEN`
-- `COOKIE_SECRET`
-
-S3 settings are only needed if you want hosted edits and uploads to persist through deploys.
